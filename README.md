@@ -1,6 +1,6 @@
 # PyInstaller for Linux -> Windows
 
-Create Windows executables on Linux using PyInstaller under Wine/Docker.  
+Create Windows executables on Linux using PyInstaller under Wine/Docker.
 Based off of [docker-pyinstaller](https://github.com/cdrx/docker-pyinstaller), but now using Python 3.12 and the latest version of PyInstaller.
 
 ---
@@ -17,11 +17,10 @@ cd pyinstaller-windows
 ```sh
 ./setup_container.sh
 ```
-**Building the container takes around 2 minutes and 20 seconds on modern hardware.
 
 ### Actual Usage
 
-For normal usage, the only file you need inside of your project is `build.py`.  
+For normal usage, the only file you need inside of your project is `build.py`.
 After you've done some programming and want to build your exe, just run:
 ```py
 ./build.py <path to python file>

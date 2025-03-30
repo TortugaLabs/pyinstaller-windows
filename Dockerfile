@@ -8,21 +8,21 @@ FROM archlinux:latest
 ARG PYTHON_VERSION=3.12.0
 ARG PYINSTALLER_VERSION=6.2
 ARG UPX_VERSION=4.2.1
-ARG PACMAN_URL=https://gist.githubusercontent.com/iiPythonx/9c932cc08a3e65b99a9863becadcdb21/raw/7392ddc954d0cc676e370a76db742f35986ef613/pacman.conf
-
 # Install everything
+COPY pacman.conf /etc/pacman.conf
+
 RUN set -x \
-    && curl -o /etc/pacman.conf $PACMAN_URL \
     && pacman-key --init \
-    && pacman -Sy wget perl-rename wine samba cabextract unzip --noconfirm \
+    && pacman -Sy wget perl-rename wine samba cabextract unzip --noconfirm
+RUN set -x \
     && wget -nv https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
     && chmod +x winetricks \
     && mv winetricks /usr/local/bin
 
 # Basic wine settings
-ENV WINEARCH win64
-ENV WINEDEBUG fixme-all
-ENV WINEPREFIX /wine
+ENV WINEARCH=win64
+ENV WINEDEBUG=fixme-all
+ENV WINEPREFIX=/wine
 
 # Download UPX
 RUN set -x \
@@ -41,21 +41,20 @@ RUN set -x \
         rm ${msifile}.msi; \
     done \
     && cd /wine/drive_c/Python$PYTHON_VERSION \
-    && echo 'wine "C:\Python3.12.0\python.exe" "$@"' > /usr/bin/python \
-    && echo 'wine "C:\Python3.12.0\Scripts\pip.exe" "$@"' > /usr/bin/pip \
-    && echo 'wine "C:\Python3.12.0\Scripts\pyupdater.exe" "$@"' > /usr/bin/pyupdater \
-    && echo 'wine "C:\Python3.12.0\Scripts\pyinstaller.exe" "$@"' > /usr/bin/pyinstaller \
+    && echo "wine 'C:\\Python$PYTHON_VERSION\\python.exe' \"\$@\"" > /usr/bin/python \
+    && echo "wine 'C:\\Python$PYTHON_VERSION\\Scripts\\pip.exe' \"\$@\"" > /usr/bin/pip \
+    && echo "wine 'C:\\Python$PYTHON_VERSION\\Scripts\\pyinstaller.exe' \"\$@\"" > /usr/bin/pyinstaller \
     && echo "assoc .py=PythonScript" | wine cmd \
-    && echo 'ftype PythonScript=c:\Python3.12.0\python.exe "%1" %*' | wine cmd \
+    && echo "ftype PythonScript=c:\\Python$PYTHON_VERSION\\python.exe \"%1\" %*" | wine cmd \
     && while pgrep wineserver >/dev/null; do sleep 1; done \
-    && chmod +x /usr/bin/python /usr/bin/pip /usr/bin/pyinstaller /usr/bin/pyupdater \
+    && chmod +x /usr/bin/python /usr/bin/pip /usr/bin/pyinstaller \
     && (pip install -U pip wheel || true) \
     && rm -rf /tmp/.wine-*
 
 ENV W_DRIVE_C=/wine/drive_c
 ENV W_WINDIR_UNIX="$W_DRIVE_C/windows"
 ENV W_SYSTEM64_DLLS="$W_WINDIR_UNIX/system32"
-ENV W_TMP="$W_DRIVE_C/windows/temp/_$0"
+ENV W_TMP="$W_DRIVE_C/windows/temp/_"
 
 # Install Microsoft Visual C++ Redistributable for Visual Studio 2017 dll files
 RUN set -x \
